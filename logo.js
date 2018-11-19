@@ -22,19 +22,27 @@ const sketch = async () => {
     'Bold'
   ];
 
-  const fontface = random.pick(fontFamilies);
-  const fontweight = random.pick(fontWeights);
+  const createFont = async () => {
+    const fontface = random.pick(fontFamilies);
+    const fontweight = random.pick(fontWeights);
 
-  const fontName = `${fontface}-${fontweight}`
-  const fontPath = `assets/fonts/${fontName}.woff2`;
+    const fontName = `${fontface}-${fontweight}`
+    const fontPath = `assets/fonts/${fontName}.woff2`;
 
-  const font = new window.FontFace(
-    fontName,
-    `url(${fontPath})`
-  );
+    const font = new window.FontFace(
+      fontName,
+      `url(${fontPath})`
+    );
 
-  await font.load();
-  document.fonts.add(font);
+    await font.load();
+    document.fonts.add(font);
+
+    return font;
+  }
+
+  const firstFont = await createFont();
+  const secondFont = await createFont();
+
 
   return ({ context, width, height }) => {
     context.fillStyle = 'white';
@@ -44,10 +52,15 @@ const sketch = async () => {
     const y = height / 2;
 
     context.fillStyle = 'black';
-    context.textAlign = 'center';
+    context.textAlign = 'right';
     context.textBaseline = 'middle';
-    context.font = `200px ${fontName}`;
-    context.fillText('SuperCollider', x, y + 400);
+    context.font = `200px ${firstFont.family}`;
+    context.fillText('Super', x, y + 400);
+
+    context.textAlign = 'left';
+    context.textBaseline = 'middle';
+    context.font = `200px ${secondFont.family}`;
+    context.fillText('Collider', x, y + 400);
   };
 };
 
