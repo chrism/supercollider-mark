@@ -1,11 +1,37 @@
 const canvasSketch = require('canvas-sketch');
+const random = require('canvas-sketch-util/random');
 
 const settings = {
   dimensions: [ 2048, 2048 ]
 };
 
 const sketch = async () => {
-  const font = new window.FontFace('IBMPlexMono-Regular', 'url(assets/fonts/IBMPlexMono-Regular.woff2)');
+  const fontFamilies = [
+    'IBMPlexMono',
+    'IBMPlexSans'
+  ];
+
+  const fontWeights = [
+    'Thin',
+    'ExtraLight',
+    'Light',
+    'Text',
+    'Regular',
+    'Medium',
+    'SemiBold',
+    'Bold'
+  ];
+
+  const fontface = random.pick(fontFamilies);
+  const fontweight = random.pick(fontWeights);
+
+  const fontName = `${fontface}-${fontweight}`
+  const fontPath = `assets/fonts/${fontName}.woff2`;
+
+  const font = new window.FontFace(
+    fontName,
+    `url(${fontPath})`
+  );
 
   await font.load();
   document.fonts.add(font);
@@ -20,7 +46,7 @@ const sketch = async () => {
     context.fillStyle = 'black';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.font = `200px "IBMPlexMono-Regular"`;
+    context.font = `200px ${fontName}`;
     context.fillText('SuperCollider', x, y + 400);
   };
 };
