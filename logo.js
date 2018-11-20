@@ -1,11 +1,25 @@
 const canvasSketch = require('canvas-sketch');
 const random = require('canvas-sketch-util/random');
+const palettes = require('nice-color-palettes');
+
+// random.setSeed(random.getRandomSeed());
+random.setSeed('965817');
 
 const settings = {
-  dimensions: [ 3000, 3000 ]
+  dimensions: [ 3000, 3000 ],
+  suffix: random.getSeed()
 };
 
-const sketch = async ({ context, width }) => {  
+const sketch = async ({ context, width }) => {
+  const palette = random.pick(palettes);
+
+  // This was added after a few seed options so hide for early ones
+  const colors = random.shuffle(palette);
+  
+  const bgColor = colors.shift();
+  const color1 = colors.shift();
+  const color2 = colors.shift();
+
   const fontFamilies = [
     'IBMPlexMono',
     'IBMPlexSans'
@@ -40,11 +54,16 @@ const sketch = async ({ context, width }) => {
     return font;
   }
 
-  const createFace = (context, barWidth = 80, boxSize = 1024) => {
+  const createFace = (context, gradient, barWidth = 80) => {
+    const boxSize = 1024;
+    context.fillStyle = gradient;
     context.fillRect(0, 0, boxSize, boxSize);
-    context.clearRect(barWidth, barWidth, boxSize - barWidth * 2, boxSize - barWidth * 2);
+    context.fillStyle = bgColor;
+    context.fillRect(barWidth, barWidth, boxSize - barWidth * 2, boxSize - barWidth * 2);
+    context.fillStyle = gradient;
     context.fillRect(barWidth * 2, barWidth * 2, boxSize - barWidth * 4, boxSize - barWidth * 4);
-    context.clearRect(barWidth * 3, barWidth * 3, boxSize - barWidth * 6, boxSize - barWidth * 6);
+    context.fillStyle = bgColor;
+    context.fillRect(barWidth * 3, barWidth * 3, boxSize - barWidth * 6, boxSize - barWidth * 6);
   }
 
   const superFont = await createFont();
@@ -61,16 +80,21 @@ const sketch = async ({ context, width }) => {
   const colliderWidth = context.measureText(colliderText).width;
 
   const centerX = width / 2;
-  const textOffset = (colliderWidth - superWidth) / 2; 
+  const textOffset = (colliderWidth - superWidth) / 2;
 
+  const textX = centerX - textOffset;
+  const textY = 2000;
+
+  const logoX = 1024;
+  const logoY = 760;
 
   return ({ context, width, height }) => {
-    // background
-    context.fillStyle = 'white';
+    context.fillStyle = bgColor;
     context.fillRect(0, 0, width, height);
-  
+
     // logo
     // Translate values from Julia code
+    // Then made some changes to the final two translate values
 
     // B = [[0,0,1] [1024,0,1] [0,1024,1]]
     // o = [556,556]
@@ -86,45 +110,38 @@ const sketch = async ({ context, width }) => {
     //     println(join(reshape(A[1:2,:], 6), ", "))
     // end
 
-    const logoX = 1024;
-    const logoY = 760;
-
     const gradientSE = context.createLinearGradient(0, 0, 1024, 1024);
-    gradientSE.addColorStop(0, "blue");
-    gradientSE.addColorStop(1, "red");
+    gradientSE.addColorStop(0, color2);
+    gradientSE.addColorStop(1, color1);
 
     const gradientNW = context.createLinearGradient(1024, 0, 0, 1024);
-    gradientNW.addColorStop(0, "blue");
-    gradientNW.addColorStop(1, "red");
+    gradientNW.addColorStop(0, color2);
+    gradientNW.addColorStop(1, color1);
 
     const gradientN = context.createLinearGradient(0, 0, 1024, 1024);
-    gradientN.addColorStop(1, "blue");
-    gradientN.addColorStop(0, "red");
+    gradientN.addColorStop(1, color2);
+    gradientN.addColorStop(0, color1);
     
-    context.fillStyle = gradientSE;
     context.setTransform(0.494140625, -0.1162109375, 0.0, 0.5810546875, 424 + logoX, 326 + logoY);
-    createFace(context);
+    createFace(context, gradientSE);
 
-    context.fillStyle = gradientNW;
     context.setTransform(0.4140625, 0.2021484375, 0.0, 0.5810546875, 0 + logoX, 119 + logoY);
-    createFace(context);
+    createFace(context, gradientNW);
 
-    context.fillStyle = gradientN;
     context.setTransform(0.4140625, 0.2021484375, -0.494140625, 0.1162109375, 506 + logoX, 0 + logoY);
-    createFace(context, 100);
+    createFace(context, gradientN, 100);
 
     context.resetTransform();
 
     // logotype
-    const textX = centerX - textOffset;
-    const textY = 2000;
-    context.fillStyle = 'black';    
 
+    context.fillStyle = color1;
     context.textAlign = 'right';
     context.textBaseline = 'middle';
     context.font = `${fontSize}px ${superFont.family}`;
     context.fillText(superText, textX, textY);
 
+    context.fillStyle = color2;
     context.textAlign = 'left';
     context.textBaseline = 'middle';
     context.font = `${fontSize}px ${colliderFont.family}`;
