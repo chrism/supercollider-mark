@@ -2,8 +2,11 @@ const canvasSketch = require('canvas-sketch');
 const random = require('canvas-sketch-util/random');
 const palettes = require('nice-color-palettes');
 
-// random.setSeed(random.getRandomSeed());
-random.setSeed('965817');
+let seed;
+
+// seed = '965817';
+random.setSeed(seed || random.getRandomSeed());
+// random.setSeed();
 
 const settings = {
   dimensions: [ 3000, 3000 ],
