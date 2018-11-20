@@ -5,7 +5,7 @@ const settings = {
   dimensions: [ 2048, 2048 ]
 };
 
-const sketch = async () => {
+const sketch = async ({ context, width }) => {  
   const fontFamilies = [
     'IBMPlexMono',
     'IBMPlexSans'
@@ -40,27 +40,40 @@ const sketch = async () => {
     return font;
   }
 
-  const firstFont = await createFont();
-  const secondFont = await createFont();
+  const superFont = await createFont();
+  const colliderFont = await createFont();
+
+  // measure fonts
+  const superText = 'Super';
+  const fontSize = 200;
+  context.font = `${fontSize}px ${superFont.family}`;
+  const superWidth = context.measureText(superText).width;
+
+  const colliderText = 'Collider';
+  context.font = `${fontSize}px ${colliderFont.family}`;
+  const colliderWidth = context.measureText(colliderText).width;
+
+  const centerX = width / 2;
+  const textOffset = (colliderWidth - superWidth) / 2; 
 
 
   return ({ context, width, height }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
+    
+    const textX = centerX - textOffset;
+    const textY = 1500;
+    context.fillStyle = 'black';    
 
-    const x = width / 2;
-    const y = height / 2;
-
-    context.fillStyle = 'black';
     context.textAlign = 'right';
     context.textBaseline = 'middle';
-    context.font = `200px ${firstFont.family}`;
-    context.fillText('Super', x, y + 400);
+    context.font = `${fontSize}px ${superFont.family}`;
+    context.fillText(superText, textX, textY);
 
     context.textAlign = 'left';
     context.textBaseline = 'middle';
-    context.font = `200px ${secondFont.family}`;
-    context.fillText('Collider', x, y + 400);
+    context.font = `${fontSize}px ${colliderFont.family}`;
+    context.fillText(colliderText, textX, textY);
   };
 };
 
